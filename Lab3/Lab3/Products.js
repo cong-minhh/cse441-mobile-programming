@@ -5,8 +5,8 @@ import {View, FlatList, StyleSheet, Text, Button, Image} from 'react-native';
 const Item = ({data}) => (
   <View style={styles.container}>
     <View style={styles.item}>
-      <Image source={{uri: data.thumbnail}} style={{width: 150, height: 150}} />
-      <View style={{flex: 1, flexDirection: 'column'}}>
+      <Image source={{uri: data.thumbnail}} style={styles.image} />
+      <View style={styles.imageAndText}>
         <Text style={styles.title}>Title: {data.title}</Text>
         <Text style={styles.text}>Description: {data.description}</Text>
         <Text style={styles.text}>Price: {data.price}</Text>
@@ -17,7 +17,7 @@ const Item = ({data}) => (
         <Text style={styles.text}>Stock: {data.stock}</Text>
         <Text style={styles.text}>Brand: {data.brand}</Text>
         <Text style={styles.text}>Category: {data.category}</Text>
-        <View>
+        <View style={styles.buttons}>
           <Button title="Detail" />
           <Button title="Add" />
           <Button title="Delete" />
@@ -32,9 +32,24 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 10,
   },
+  image: {
+    width: 100,
+    height: 100,
+  },
+  imageAndText: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  buttons: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+  },
   item: {
     marginHorizontal: 10,
     marginVertical: 5,
+    width: 270,
     backgroundColor: '#F6F6F6',
     flex: 2,
     flexDirection: 'row',
