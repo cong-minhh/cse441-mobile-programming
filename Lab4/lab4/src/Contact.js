@@ -19,6 +19,7 @@ const Contacts = ({navigation}) => {
   useEffect(() => {
     fetchContacts()
       .then(contact => {
+        console.log('hello');
         dispatch(fetchContactsSuccess(contact));
       })
       .catch(e => {

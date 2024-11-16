@@ -27,7 +27,7 @@ function ContactsScreens() {
         name="ProfileContact"
         component={ProfileContact}
         options={{ title: 'Profile contact' }}
-      />  
+      />
     </Drawer.Navigator>
   );
 }
