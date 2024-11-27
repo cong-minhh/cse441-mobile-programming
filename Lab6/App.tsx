@@ -3,16 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import HomeScreen from './src/screens/HomeScreen';
-import AddServiceScreen from './src/screens/AddServiceScreen';
-import ServiceDetailScreen from './src/screens/ServiceDetailScreen';
+import HomeScreen from './src/screens/SettingScreen';
+import AddServiceScreen from './src/screens/CustomerScreen';
+import ServiceDetailScreen from './src/screens/TransactionDetailScreen';
 import LoginScreen from './src/screens/LoginScreen';
-import CustomerScreen from './src/screens/CustomerScreen.js';
-import AddCustomerScreen from './src/screens/AddCustomerScreen.js';
-import TransactionDetailScreen from './src/screens/TransactionDetailScreen.js';
-import TransactionScreen from './src/screens/TransactionScreen.js';
-import SettingScreen from './src/screens/SettingScreen.js';
-
 
 const Stack = createStackNavigator();
 
@@ -63,28 +57,12 @@ const App = () => {
           >
             {props => <LoginScreen {...props} onLoginSuccess={handleLoginSuccess} />}
           </Stack.Screen>
-
         ) : (
           <>
             <Stack.Screen
               name="Home"
               component={HomeScreen}
               options={{ title: 'HUYỀN TRINH' }}
-            />
-            <Stack.Screen
-              name="Customer"
-              component={CustomerScreen}
-              options={{ title: 'Customer' }}
-            />
-            <Stack.Screen
-              name="AddCustomer"
-              component={AddCustomerScreen}
-              options={{ title: 'Add customer' }}
-            />
-            <Stack.Screen
-              name="Transactions"
-              component={TransactionScreen}
-              options={{ title: 'Add Transactions' }}
             />
             <Stack.Screen
               name="AddService"
