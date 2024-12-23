@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, Text, StyleSheet, Alert} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomHeader from '../components/CustomHeader';
 
-const ServiceDetailScreen = ({ route, navigation }) => {
-  const { serviceId } = route.params;
+const ServiceDetailScreen = ({route, navigation}) => {
+  const {serviceId} = route.params;
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -21,8 +26,8 @@ const ServiceDetailScreen = ({ route, navigation }) => {
       const response = await axios.get(
         `https://kami-backend-5rs0.onrender.com/Services/${serviceId}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
       setService(response.data);
     } catch (error) {
@@ -39,8 +44,8 @@ const ServiceDetailScreen = ({ route, navigation }) => {
       await axios.delete(
         `https://kami-backend-5rs0.onrender.com/Services/${serviceId}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
       navigation.goBack();
     } catch (error) {
@@ -55,7 +60,8 @@ const ServiceDetailScreen = ({ route, navigation }) => {
         <Icon name="more-vert" size={24} color="#fff" style={styles.menuIcon} />
       </MenuTrigger>
       <MenuOptions>
-        <MenuOption onSelect={() => navigation.navigate('EditService', { serviceId })}>
+        <MenuOption
+          onSelect={() => navigation.navigate('EditService', {serviceId})}>
           <View style={styles.menuOption}>
             <Icon name="edit" size={20} color="#666" />
             <Text style={styles.menuText}>Edit</Text>
@@ -74,7 +80,7 @@ const ServiceDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <CustomHeader 
+        <CustomHeader
           title="Service Details"
           onBack={() => navigation.goBack()}
         />
@@ -88,7 +94,7 @@ const ServiceDetailScreen = ({ route, navigation }) => {
   if (!service) {
     return (
       <View style={styles.container}>
-        <CustomHeader 
+        <CustomHeader
           title="Service Details"
           onBack={() => navigation.goBack()}
         />
@@ -101,7 +107,7 @@ const ServiceDetailScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader 
+      <CustomHeader
         title="Service Details"
         onBack={() => navigation.goBack()}
         rightComponent={renderThreeDotMenu()}
@@ -115,7 +121,9 @@ const ServiceDetailScreen = ({ route, navigation }) => {
           <Text style={styles.value}>{service.price} đ</Text>
 
           <Text style={styles.label}>Description</Text>
-          <Text style={styles.value}>{service.description || 'No description'}</Text>
+          <Text style={styles.value}>
+            {service.description || 'No description'}
+          </Text>
         </View>
       </View>
     </View>

@@ -1,11 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomHeader from '../components/CustomHeader';
 
-const CustomerScreen = ({ navigation }) => {
+const CustomerScreen = ({navigation}) => {
   const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
@@ -18,8 +25,8 @@ const CustomerScreen = ({ navigation }) => {
       const response = await axios.get(
         'https://kami-backend-5rs0.onrender.com/Customers',
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
       setCustomers(response.data);
     } catch (error) {
@@ -28,11 +35,12 @@ const CustomerScreen = ({ navigation }) => {
     }
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({item}) => (
     <TouchableOpacity
       style={styles.customerCard}
-      onPress={() => navigation.navigate('CustomerDetail', { customerId: item._id })}
-    >
+      onPress={() =>
+        navigation.navigate('CustomerDetail', {customerId: item._id})
+      }>
       <View style={styles.customerInfo}>
         <Text style={styles.customerName}>{item.name}</Text>
         <Text style={styles.customerPhone}>{item.phone}</Text>
@@ -42,20 +50,16 @@ const CustomerScreen = ({ navigation }) => {
   );
 
   const renderAddButton = () => (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={() => navigation.navigate('AddCustomer')}
-      style={styles.addButton}
-    >
+      style={styles.addButton}>
       <Icon name="add" size={24} color="#fff" />
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <CustomHeader 
-        title="Customers"
-        rightComponent={renderAddButton()}
-      />
+      <CustomHeader title="Customers" rightComponent={renderAddButton()} />
       <FlatList
         data={customers}
         renderItem={renderItem}

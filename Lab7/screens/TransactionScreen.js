@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomHeader from '../components/CustomHeader';
 
-const TransactionScreen = ({ navigation }) => {
+const TransactionScreen = ({navigation}) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,8 +19,8 @@ const TransactionScreen = ({ navigation }) => {
       const response = await axios.get(
         'https://kami-backend-5rs0.onrender.com/Transactions',
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
       setTransactions(response.data);
     } catch (error) {
@@ -30,52 +30,67 @@ const TransactionScreen = ({ navigation }) => {
     }
   };
 
-  const renderItem = ({ item }) => {
-    const totalAmount = item.services.reduce((sum, service) => 
-      sum + (service.price * service.quantity), 0);
-
+  const renderItem = ({item}) => {
     return (
       <TouchableOpacity
-        style={styles.transactionCard}
-        onPress={() => navigation.navigate('TransactionDetail', { transactionId: item._id })}
-      >
-        <View style={styles.cardHeader}>
-          <Text style={styles.customerName}>{item.customerName}</Text>
-          <Text style={styles.date}>
-            {new Date(item.date).toLocaleDateString()}
+        style={styles.card}
+        onPress={() =>
+          navigation.navigate('TransactionDetail', {transactionId: item._id})
+        }>
+        <View>
+          <Text style={styles.idDate}>
+            {item.id} -{' '}
+            {new Date(item.createdAt).toLocaleString('en-US', {
+              year: '2-digit',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+            {item.status === 'cancelled' && (
+              <Text style={styles.cancelled}> - Cancelled</Text>
+            )}
+          </Text>
+
+          {item.services.map((service, index) => (
+            <View key={index} style={styles.serviceRow}>
+              <Text style={styles.bullet}>-</Text>
+              <Text style={styles.serviceText}>{service.name}</Text>
+            </View>
+          ))}
+
+          <Text style={styles.price}>{item.price.toLocaleString()} đ</Text>
+
+          <Text style={styles.customerText}>
+            Customer: {item.customer?.name || 'N/A'}
           </Text>
         </View>
-        <View style={styles.cardContent}>
-          <Text style={styles.serviceCount}>
-            {item.services.length} service{item.services.length !== 1 ? 's' : ''}
-          </Text>
-          <Text style={styles.amount}>{totalAmount.toLocaleString()} đ</Text>
-        </View>
-        <Icon name="chevron-right" size={24} color="#666" />
       </TouchableOpacity>
     );
   };
 
   const renderAddButton = () => (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={() => navigation.navigate('AddTransaction')}
-      style={styles.addButton}
-    >
+      style={styles.addButton}>
       <Icon name="add" size={24} color="#fff" />
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <CustomHeader 
-        title="Transactions"
+      <CustomHeader
+        title="Transaction"
+        navigation={navigation}
         rightComponent={renderAddButton()}
+        containerStyle={styles.headerContainer}
       />
       <FlatList
+        style={styles.listContainer}
+        contentContainerStyle={styles.listContent}
         data={transactions}
         renderItem={renderItem}
         keyExtractor={item => item._id}
-        contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
@@ -93,44 +108,59 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  listContent: {
-    padding: 16,
+  headerContainer: {
+    width: '100%',
+    backgroundColor: '#e91e63',
   },
-  transactionCard: {
-    backgroundColor: '#fff',
+  listContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  listContent: {
+    paddingVertical: 16,
+  },
+  card: {
+    backgroundColor: 'white',
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
     elevation: 2,
   },
-  cardHeader: {
-    flex: 1,
-  },
-  customerName: {
-    fontSize: 16,
-    fontWeight: '500',
+  idDate: {
+    fontSize: 14,
     color: '#333',
-    marginBottom: 4,
-  },
-  date: {
-    fontSize: 14,
-    color: '#666',
-  },
-  cardContent: {
-    marginRight: 16,
-    alignItems: 'flex-end',
-  },
-  serviceCount: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  amount: {
-    fontSize: 16,
+    marginBottom: 8,
     fontWeight: '500',
-    color: '#e91e63',
+  },
+  serviceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 2,
+  },
+  bullet: {
+    marginRight: 8,
+    color: '#666',
+  },
+  serviceText: {
+    flex: 1,
+    color: '#666',
+    fontSize: 14,
+  },
+  price: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
+    textAlign: 'right',
+    marginTop: 4,
+  },
+  customerText: {
+    color: '#666',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  cancelled: {
+    color: '#FF0000',
+    fontWeight: '500',
   },
   addButton: {
     padding: 8,

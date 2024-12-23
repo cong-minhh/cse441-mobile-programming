@@ -12,11 +12,18 @@ const api = axios.create({
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
-  async (config) => {
+  async config => {
     try {
-      const token = await AsyncStorage.getItem('loginToken');
+      const token = await AsyncStorage.getItem('userToken');
+      console.log('Current token:', token);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log(
+          'Added Authorization header:',
+          config.headers.Authorization,
+        );
+      } else {
+        console.log('No token found in AsyncStorage');
       }
       return config;
     } catch (error) {
@@ -24,29 +31,29 @@ api.interceptors.request.use(
       return Promise.reject(error);
     }
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     if (error.response?.status === 401) {
-      await AsyncStorage.removeItem('loginToken');
+      await AsyncStorage.removeItem('userToken');
       // You might want to trigger a navigation to login screen here
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const authAPI = {
   login: async (phoneNumber, password) => {
     try {
-      const response = await api.post('/auth/', { phoneNumber, password });
+      const response = await api.post('/auth/', {phoneNumber, password});
       if (response.data.token) {
-        await AsyncStorage.setItem('loginToken', response.data.token);
+        await AsyncStorage.setItem('userToken', response.data.token);
       }
       return response.data;
     } catch (error) {
@@ -56,7 +63,7 @@ export const authAPI = {
   },
   logout: async () => {
     try {
-      await AsyncStorage.removeItem('loginToken');
+      await AsyncStorage.removeItem('userToken');
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
@@ -69,11 +76,11 @@ export const servicesAPI = {
     const response = await api.get('/services');
     return response.data;
   },
-  getById: async (id) => {
+  getById: async id => {
     const response = await api.get(`/services/${id}`);
     return response.data;
   },
-  create: async (serviceData) => {
+  create: async serviceData => {
     const response = await api.post('/services', serviceData);
     return response.data;
   },
@@ -81,7 +88,7 @@ export const servicesAPI = {
     const response = await api.put(`/services/${id}`, serviceData);
     return response.data;
   },
-  delete: async (id) => {
+  delete: async id => {
     const response = await api.delete(`/services/${id}`);
     return response.data;
   },
@@ -92,7 +99,7 @@ export const customersAPI = {
     const response = await api.get('/customers');
     return response.data;
   },
-  create: async (customerData) => {
+  create: async customerData => {
     const response = await api.post('/customers', customerData);
     return response.data;
   },
@@ -103,8 +110,29 @@ export const transactionsAPI = {
     const response = await api.get('/transactions');
     return response.data;
   },
-  getById: async (id) => {
+  getById: async id => {
     const response = await api.get(`/transactions/${id}`);
     return response.data;
+  },
+  cancel: async transactionId => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      console.log('Making cancel request for transaction:', transactionId);
+      const response = await api.put(`/transactions/${transactionId}`, {
+        status: 'cancelled',
+      });
+      console.log('Cancel response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(
+        'Cancel error details:',
+        error.response?.data || error.message,
+      );
+      throw error;
+    }
   },
 };

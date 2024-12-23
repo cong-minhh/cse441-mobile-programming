@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../components/CustomHeader';
 
-const AddCustomerScreen = ({ navigation }) => {
+const AddCustomerScreen = ({navigation}) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -22,11 +29,11 @@ const AddCustomerScreen = ({ navigation }) => {
         {
           name,
           phone,
-          address
+          address,
         },
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
       navigation.goBack();
     } catch (error) {
@@ -37,10 +44,7 @@ const AddCustomerScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader 
-        title="Add Customer"
-        onBack={() => navigation.goBack()}
-      />
+      <CustomHeader title="Add Customer" onBack={() => navigation.goBack()} />
       <View style={styles.content}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Name *</Text>

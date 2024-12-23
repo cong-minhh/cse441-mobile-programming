@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import {View, Text, StyleSheet, Alert} from 'react-native';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import {useAuth} from '../context/AuthContext';
 
-const DeleteCustomerScreen = ({ route, navigation }) => {
-  const { customerId } = route.params;
-  const { token } = useAuth();
+const DeleteCustomerScreen = ({route, navigation}) => {
+  const {customerId} = route.params;
+  const {token} = useAuth();
 
   React.useEffect(() => {
     showDeleteConfirmation();
@@ -16,8 +16,8 @@ const DeleteCustomerScreen = ({ route, navigation }) => {
       await axios.delete(
         `https://kami-backend5rs0.onrender.com/Customers/${customerId}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
       navigation.navigate('Customers');
     } catch (error) {
@@ -41,7 +41,7 @@ const DeleteCustomerScreen = ({ route, navigation }) => {
           style: 'destructive',
         },
       ],
-      { cancelable: false }
+      {cancelable: false},
     );
   };
 

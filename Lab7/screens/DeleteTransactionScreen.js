@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import {View, Text, StyleSheet, Alert} from 'react-native';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import {useAuth} from '../context/AuthContext';
 
-const DeleteTransactionScreen = ({ route, navigation }) => {
-  const { transactionId } = route.params;
-  const { token } = useAuth();
+const DeleteTransactionScreen = ({route, navigation}) => {
+  const {transactionId} = route.params;
+  const {token} = useAuth();
 
   React.useEffect(() => {
     showDeleteConfirmation();
@@ -16,8 +16,8 @@ const DeleteTransactionScreen = ({ route, navigation }) => {
       await axios.delete(
         `https://kami-backend5rs0.onrender.com/transactions/${transactionId}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
       navigation.goBack();
     } catch (error) {
@@ -41,7 +41,7 @@ const DeleteTransactionScreen = ({ route, navigation }) => {
           style: 'destructive',
         },
       ],
-      { cancelable: false }
+      {cancelable: false},
     );
   };
 

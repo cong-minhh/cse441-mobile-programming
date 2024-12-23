@@ -1,26 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from 'react-native-popup-menu';
 import CustomHeader from '../components/CustomHeader';
 
-const ThreeDotMenu = ({ navigation, customer, handleDelete }) => (
+const ThreeDotMenu = ({navigation, customer, handleDelete}) => (
   <Menu>
     <MenuTrigger>
-      <Icon name="more-vert" size={24} color="#fff" style={{ marginRight: 15 }} />
+      <Icon name="more-vert" size={24} color="#fff" style={{marginRight: 15}} />
     </MenuTrigger>
-    <MenuOptions customStyles={{
-      optionsContainer: {
-        backgroundColor: 'white',
-        padding: 5,
-        borderRadius: 5,
-        width: 150,
-        elevation: 3,
-      }
-    }}>
-      <MenuOption onSelect={() => navigation.navigate('EditCustomer', { customer })} style={styles.menuOption}>
+    <MenuOptions
+      customStyles={{
+        optionsContainer: {
+          backgroundColor: 'white',
+          padding: 5,
+          borderRadius: 5,
+          width: 150,
+          elevation: 3,
+        },
+      }}>
+      <MenuOption
+        onSelect={() => navigation.navigate('EditCustomer', {customer})}
+        style={styles.menuOption}>
         <Icon name="edit" size={20} color="#e91e63" />
         <Text style={styles.menuText}>Edit</Text>
       </MenuOption>
@@ -32,9 +47,9 @@ const ThreeDotMenu = ({ navigation, customer, handleDelete }) => (
   </Menu>
 );
 
-const CustomerDetailScreen = ({ route, navigation }) => {
+const CustomerDetailScreen = ({route, navigation}) => {
   const [customer, setCustomer] = useState(null);
-  const { customerId } = route.params;
+  const {customerId} = route.params;
 
   useEffect(() => {
     fetchCustomerDetails();
@@ -49,9 +64,9 @@ const CustomerDetailScreen = ({ route, navigation }) => {
         },
         headerTintColor: '#fff',
         headerRight: () => (
-          <ThreeDotMenu 
-            navigation={navigation} 
-            customer={customer} 
+          <ThreeDotMenu
+            navigation={navigation}
+            customer={customer}
             handleDelete={handleDelete}
           />
         ),
@@ -65,8 +80,8 @@ const CustomerDetailScreen = ({ route, navigation }) => {
       const response = await axios.get(
         `https://kami-backend-5rs0.onrender.com/Customers/${customerId}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
       setCustomer(response.data);
     } catch (error) {
@@ -77,40 +92,40 @@ const CustomerDetailScreen = ({ route, navigation }) => {
 
   const handleDelete = () => {
     Alert.alert(
-      "Delete Customer",
-      "Are you sure you want to delete this customer?",
+      'Delete Customer',
+      'Are you sure you want to delete this customer?',
       [
         {
-          text: "Cancel",
-          style: "cancel"
+          text: 'Cancel',
+          style: 'cancel',
         },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('userToken');
               await axios.delete(
                 `https://kami-backend-5rs0.onrender.com/Customers/${customerId}`,
                 {
-                  headers: { Authorization: `Bearer ${token}` }
-                }
+                  headers: {Authorization: `Bearer ${token}`},
+                },
               );
               navigation.goBack();
             } catch (error) {
               console.error('Failed to delete customer:', error);
               Alert.alert('Error', 'Failed to delete customer');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 
   if (!customer) {
     return (
       <View style={styles.container}>
-        <CustomHeader 
+        <CustomHeader
           title="Customer Detail"
           onBack={() => navigation.goBack()}
         />
@@ -124,20 +139,27 @@ const CustomerDetailScreen = ({ route, navigation }) => {
   const calculateTotalSpent = () => {
     if (!customer.transactions) return 0;
     return customer.transactions.reduce((total, transaction) => {
-      const transactionTotal = transaction.services?.reduce(
-        (sum, service) => sum + (service.price * service.quantity),
-        0
-      ) || 0;
+      const transactionTotal =
+        transaction.services?.reduce(
+          (sum, service) => sum + service.price * service.quantity,
+          0,
+        ) || 0;
       return total + transactionTotal;
     }, 0);
   };
 
   return (
     <View style={styles.container}>
-      <CustomHeader 
+      <CustomHeader
         title={customer.name}
         onBack={() => navigation.goBack()}
-        rightComponent={<ThreeDotMenu navigation={navigation} customer={customer} handleDelete={handleDelete}/>}
+        rightComponent={
+          <ThreeDotMenu
+            navigation={navigation}
+            customer={customer}
+            handleDelete={handleDelete}
+          />
+        }
       />
       <ScrollView style={styles.content}>
         <View style={styles.section}>
@@ -152,14 +174,16 @@ const CustomerDetailScreen = ({ route, navigation }) => {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Total spent:</Text>
-            <Text style={[styles.value, { color: '#e91e63' }]}>
+            <Text style={[styles.value, {color: '#e91e63'}]}>
               {calculateTotalSpent().toLocaleString()} đ
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Last update:</Text>
             <Text style={styles.value}>
-              {customer.updatedAt ? new Date(customer.updatedAt).toLocaleDateString() : '-'}
+              {customer.updatedAt
+                ? new Date(customer.updatedAt).toLocaleDateString()
+                : '-'}
             </Text>
           </View>
         </View>
@@ -170,7 +194,8 @@ const CustomerDetailScreen = ({ route, navigation }) => {
             <View key={index} style={styles.transactionCard}>
               <Text style={styles.transactionId}>HD{transaction._id}</Text>
               <Text style={styles.transactionDate}>
-                {new Date(transaction.date).toLocaleDateString()} {new Date(transaction.date).toLocaleTimeString()}
+                {new Date(transaction.date).toLocaleDateString()}{' '}
+                {new Date(transaction.date).toLocaleTimeString()}
               </Text>
               {transaction.services?.map((service, sIndex) => (
                 <View key={sIndex} style={styles.serviceRow}>

@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../components/CustomHeader';
 
-const EditCustomerScreen = ({ route, navigation }) => {
-  const { customer } = route.params;
+const EditCustomerScreen = ({route, navigation}) => {
+  const {customer} = route.params;
   const [name, setName] = useState(customer.name);
   const [phone, setPhone] = useState(customer.phone);
 
@@ -14,8 +21,8 @@ const EditCustomerScreen = ({ route, navigation }) => {
       const token = await AsyncStorage.getItem('userToken');
       await axios.put(
         `https://kami-backend-5rs0.onrender.com/Customers/${customer._id}`,
-        { name, phone },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {name, phone},
+        {headers: {Authorization: `Bearer ${token}`}},
       );
       navigation.goBack();
     } catch (error) {
@@ -26,10 +33,7 @@ const EditCustomerScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader 
-        title="Edit Customer"
-        onBack={() => navigation.goBack()}
-      />
+      <CustomHeader title="Edit Customer" onBack={() => navigation.goBack()} />
       <View style={styles.content}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Customer name *</Text>

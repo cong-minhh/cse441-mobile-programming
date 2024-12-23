@@ -1,13 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomHeader from '../components/CustomHeader';
-import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from 'react-native-popup-menu';
 
-const TransactionDetailScreen = ({ route, navigation }) => {
-  const { transactionId } = route.params;
+const TransactionDetailScreen = ({route, navigation}) => {
+  const {transactionId} = route.params;
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAllDetails, setShowAllDetails] = useState(false);
@@ -19,15 +31,18 @@ const TransactionDetailScreen = ({ route, navigation }) => {
   const fetchTransactionDetails = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
+      console.log('Fetching transaction details for ID:', transactionId);
       const response = await axios.get(
-        `https://kami-backend-5rs0.onrender.com/Transactions/${transactionId}`,
+        `https://kami-backend-5rs0.onrender.com/transactions/${transactionId}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+          headers: {Authorization: `Bearer ${token}`},
+        },
       );
+      console.log('Transaction details:', response.data);
       setTransaction(response.data);
     } catch (error) {
       console.error('Failed to fetch transaction details:', error);
+      console.error('Error response:', error.response?.data);
       Alert.alert('Error', 'Failed to fetch transaction details');
     } finally {
       setLoading(false);
@@ -48,16 +63,42 @@ const TransactionDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('userToken');
-              await axios.delete(
-                `https://kami-backend-5rs0.onrender.com/Transactions/${transactionId}`,
-                {
-                  headers: { Authorization: `Bearer ${token}` }
-                }
+              if (!token) {
+                throw new Error('No authentication token found');
+              }
+
+              console.log('Transaction ID:', transactionId);
+              if (!transactionId) {
+                throw new Error('Transaction ID is not defined');
+              }
+
+              console.log(
+                'Making cancel request for transaction:',
+                transactionId,
               );
+              const response = await axios.put(
+                `https://kami-backend-5rs0.onrender.com/transactions/${transactionId}`,
+                {
+                  status: 'cancelled',
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                },
+              );
+              console.log('Cancel response:', response.data);
+              Alert.alert('Success', 'Transaction cancelled successfully');
               navigation.goBack();
             } catch (error) {
-              console.error('Failed to cancel transaction:', error);
-              Alert.alert('Error', 'Failed to cancel transaction');
+              console.error('Failed to cancel transaction:', error.message);
+              console.error('Error details:', error.response?.data);
+              Alert.alert(
+                'Error',
+                error.response?.data?.errors[0]?.msg ||
+                  'Failed to cancel transaction',
+              );
             }
           },
         },
@@ -68,7 +109,7 @@ const TransactionDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <CustomHeader 
+        <CustomHeader
           title="Transaction Details"
           onBack={() => navigation.goBack()}
         />
@@ -82,7 +123,7 @@ const TransactionDetailScreen = ({ route, navigation }) => {
   if (!transaction) {
     return (
       <View style={styles.container}>
-        <CustomHeader 
+        <CustomHeader
           title="Transaction Details"
           onBack={() => navigation.goBack()}
         />
@@ -93,13 +134,14 @@ const TransactionDetailScreen = ({ route, navigation }) => {
     );
   }
 
-  const totalAmount = transaction.services.reduce((sum, service) => 
-    sum + (service.price * service.quantity), 0
+  const totalAmount = transaction.services.reduce(
+    (sum, service) => sum + service.price * service.quantity,
+    0,
   );
 
   return (
     <View style={styles.container}>
-      <CustomHeader 
+      <CustomHeader
         title="Transaction Details"
         onBack={() => navigation.goBack()}
         rightComponent={
@@ -127,7 +169,9 @@ const TransactionDetailScreen = ({ route, navigation }) => {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Customer</Text>
-            <Text style={styles.value}>{transaction.customer?.name || 'N/A'}</Text>
+            <Text style={styles.value}>
+              {transaction.customer?.name || 'N/A'}
+            </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Creation time</Text>
@@ -145,7 +189,9 @@ const TransactionDetailScreen = ({ route, navigation }) => {
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.label}>Status</Text>
-                <Text style={styles.value}>{transaction.status || 'Active'}</Text>
+                <Text style={styles.value}>
+                  {transaction.status || 'Active'}
+                </Text>
               </View>
             </>
           )}

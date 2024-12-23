@@ -1,29 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import {Picker} from '@react-native-picker/picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../components/CustomHeader';
 
-const AddTransactionScreen = ({ navigation }) => {
+const AddTransactionScreen = ({navigation}) => {
   const [customers, setCustomers] = useState([]);
   const [services, setServices] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState('');
-  const [selectedServices, setSelectedServices] = useState([{ serviceId: '', quantity: 1 }]);
+  const [selectedServices, setSelectedServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
     fetchCustomersAndServices();
   }, []);
 
+  useEffect(() => {
+    // Calculate total amount whenever selected services change
+    const total = selectedServices.reduce((sum, service) => {
+      const serviceInfo = services.find(s => s._id === service.serviceId);
+      return sum + (serviceInfo?.price || 0) * (service.quantity || 1);
+    }, 0);
+    setTotalAmount(total);
+  }, [selectedServices, services]);
+
   const fetchCustomersAndServices = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const headers = { Authorization: `Bearer ${token}` };
+      const headers = {Authorization: `Bearer ${token}`};
 
       const [customersResponse, servicesResponse] = await Promise.all([
-        axios.get('https://kami-backend-5rs0.onrender.com/Customers', { headers }),
-        axios.get('https://kami-backend-5rs0.onrender.com/Services', { headers })
+        axios.get('https://kami-backend-5rs0.onrender.com/Customers', {
+          headers,
+        }),
+        axios.get('https://kami-backend-5rs0.onrender.com/Services', {headers}),
       ]);
 
       setCustomers(customersResponse.data);
@@ -36,53 +56,54 @@ const AddTransactionScreen = ({ navigation }) => {
     }
   };
 
-  const handleAddService = () => {
-    setSelectedServices([...selectedServices, { serviceId: '', quantity: 1 }]);
-  };
-
-  const handleRemoveService = (index) => {
-    const newServices = selectedServices.filter((_, i) => i !== index);
-    setSelectedServices(newServices);
-  };
-
   const handleServiceChange = (index, field, value) => {
     const newServices = [...selectedServices];
-    newServices[index] = { ...newServices[index], [field]: value };
+    newServices[index] = {...newServices[index], [field]: value};
     setSelectedServices(newServices);
   };
 
   const handleSubmit = async () => {
-    if (!selectedCustomer || selectedServices.some(s => !s.serviceId)) {
+    if (!selectedCustomer || selectedServices.length === 0) {
       Alert.alert('Error', 'Please select a customer and at least one service');
       return;
     }
 
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const selectedServicesData = selectedServices
-        .filter(s => s.serviceId) // Remove any empty service selections
-        .map(s => {
-          const serviceInfo = services.find(srv => srv._id === s.serviceId);
-          return {
-            name: serviceInfo.name,
-            price: serviceInfo.price,
-            quantity: parseInt(s.quantity) || 1
-          };
-        });
+      const selectedServicesData = selectedServices.map(s => {
+        const serviceInfo = services.find(srv => srv._id === s.serviceId);
+        return {
+          _id: serviceInfo._id,
+          quantity: parseInt(s.quantity) || 1,
+        };
+      });
 
-      await axios.post(
-        'https://kami-backend-5rs0.onrender.com/Transactions',
+      const requestData = {
+        customerId: selectedCustomer,
+        services: selectedServicesData,
+      };
+
+      console.log('Sending request with data:', requestData);
+
+      const response = await axios.post(
+        'https://kami-backend-5rs0.onrender.com/transactions',
+        requestData,
         {
-          customerId: selectedCustomer,
-          services: selectedServicesData
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
       );
+
+      console.log('Response:', response.data);
+      Alert.alert('Success', 'Transaction added successfully');
       navigation.goBack();
     } catch (error) {
-      console.error('Failed to add transaction:', error);
+      console.error(
+        'Failed to add transaction:',
+        error.response?.data || error.message,
+      );
       Alert.alert('Error', 'Failed to add transaction. Please try again.');
     }
   };
@@ -90,7 +111,7 @@ const AddTransactionScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <CustomHeader 
+        <CustomHeader
           title="Add Transaction"
           onBack={() => navigation.goBack()}
         />
@@ -103,85 +124,113 @@ const AddTransactionScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader 
-        title="Add Transaction"
-        onBack={() => navigation.goBack()}
-      />
+      <CustomHeader title="Add transaction" navigation={navigation} />
       <ScrollView style={styles.content}>
-        <View style={styles.section}>
+        <View style={styles.formGroup}>
           <Text style={styles.label}>Customer *</Text>
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={selectedCustomer}
-              onValueChange={setSelectedCustomer}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select a customer" value="" />
+              onValueChange={value => setSelectedCustomer(value)}
+              style={styles.picker}>
+              <Picker.Item label="Select customer" value="" />
               {customers.map(customer => (
-                <Picker.Item 
-                  key={customer._id} 
-                  label={customer.name} 
-                  value={customer._id} 
+                <Picker.Item
+                  key={customer._id}
+                  label={customer.name}
+                  value={customer._id}
                 />
               ))}
             </Picker>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Services *</Text>
-          {selectedServices.map((service, index) => (
-            <View key={index} style={styles.serviceItem}>
-              <View style={styles.servicePickerContainer}>
-                <Picker
-                  selectedValue={service.serviceId}
-                  onValueChange={(value) => handleServiceChange(index, 'serviceId', value)}
-                  style={styles.servicePicker}
-                >
-                  <Picker.Item label="Select a service" value="" />
-                  {services.map(s => (
-                    <Picker.Item 
-                      key={s._id} 
-                      label={`${s.name} (${s.price} đ)`} 
-                      value={s._id} 
-                    />
-                  ))}
-                </Picker>
-              </View>
-
-              <View style={styles.quantityContainer}>
-                <Text style={styles.quantityLabel}>Qty:</Text>
-                <TextInput
-                  style={styles.quantityInput}
-                  value={service.quantity.toString()}
-                  onChangeText={(value) => handleServiceChange(index, 'quantity', value)}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              {index > 0 && (
-                <TouchableOpacity 
-                  onPress={() => handleRemoveService(index)}
-                  style={styles.removeButton}
-                >
-                  <Text style={styles.removeButtonText}>Remove</Text>
-                </TouchableOpacity>
+        {services.map((service, index) => (
+          <View key={service._id} style={styles.serviceItem}>
+            <TouchableOpacity
+              style={[
+                styles.checkbox,
+                selectedServices.some(s => s.serviceId === service._id) &&
+                  styles.checkboxChecked,
+              ]}
+              onPress={() => {
+                const isSelected = selectedServices.some(
+                  s => s.serviceId === service._id,
+                );
+                if (isSelected) {
+                  setSelectedServices(
+                    selectedServices.filter(s => s.serviceId !== service._id),
+                  );
+                } else {
+                  setSelectedServices([
+                    ...selectedServices,
+                    {serviceId: service._id, quantity: 1},
+                  ]);
+                }
+              }}>
+              {selectedServices.some(s => s.serviceId === service._id) && (
+                <Text style={styles.checkmark}>✓</Text>
+              )}
+            </TouchableOpacity>
+            <View style={styles.serviceDetails}>
+              <Text style={styles.serviceName}>{service.name}</Text>
+              <Text style={styles.servicePrice}>
+                {service.price.toLocaleString()} ₫
+              </Text>
+              {selectedServices.some(s => s.serviceId === service._id) && (
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => {
+                      const currentService = selectedServices.find(
+                        s => s.serviceId === service._id,
+                      );
+                      if (currentService && currentService.quantity > 1) {
+                        handleServiceChange(
+                          selectedServices.findIndex(
+                            s => s.serviceId === service._id,
+                          ),
+                          'quantity',
+                          currentService.quantity - 1,
+                        );
+                      }
+                    }}>
+                    <Text style={styles.quantityButtonText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.quantityText}>
+                    {selectedServices.find(s => s.serviceId === service._id)
+                      ?.quantity || 1}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => {
+                      const currentService = selectedServices.find(
+                        s => s.serviceId === service._id,
+                      );
+                      if (currentService) {
+                        handleServiceChange(
+                          selectedServices.findIndex(
+                            s => s.serviceId === service._id,
+                          ),
+                          'quantity',
+                          (currentService.quantity || 1) + 1,
+                        );
+                      }
+                    }}>
+                    <Text style={styles.quantityButtonText}>+</Text>
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
-          ))}
-
-          <TouchableOpacity 
-            style={styles.addServiceButton} 
-            onPress={handleAddService}
-          >
-            <Text style={styles.addServiceButtonText}>Add Another Service</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Add Transaction</Text>
-        </TouchableOpacity>
+          </View>
+        ))}
       </ScrollView>
+
+      <TouchableOpacity style={styles.summaryButton} onPress={handleSubmit}>
+        <Text style={styles.summaryButtonText}>
+          See summary: ({totalAmount.toLocaleString()} ₫)
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -189,92 +238,100 @@ const AddTransactionScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
     padding: 16,
   },
-  section: {
-    marginBottom: 24,
+  formGroup: {
+    marginBottom: 20,
   },
   label: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
     marginBottom: 8,
+    color: '#333',
   },
   pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
     backgroundColor: '#fff',
-    borderRadius: 4,
-    marginBottom: 16,
   },
   picker: {
     height: 50,
   },
   serviceItem: {
-    backgroundColor: '#fff',
-    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 12,
-    marginBottom: 12,
-  },
-  servicePickerContainer: {
     marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
-  servicePicker: {
-    height: 50,
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#FF4B81',
+    borderColor: '#FF4B81',
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  serviceDetails: {
+    flex: 1,
+  },
+  serviceName: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  servicePrice: {
+    fontSize: 14,
+    color: '#FF4B81',
+    fontWeight: '500',
   },
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 8,
   },
-  quantityLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginRight: 8,
-  },
-  quantityInput: {
-    backgroundColor: '#fff',
+  quantityButton: {
+    width: 30,
+    height: 30,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 4,
-    padding: 8,
-    width: 60,
-    textAlign: 'center',
-  },
-  removeButton: {
-    marginTop: 8,
-    padding: 8,
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffebee',
-    borderRadius: 4,
   },
-  removeButtonText: {
-    color: '#e91e63',
-    fontSize: 14,
+  quantityButtonText: {
+    fontSize: 18,
+    color: '#666',
   },
-  addServiceButton: {
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    padding: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e91e63',
-    marginTop: 8,
+  quantityText: {
+    marginHorizontal: 12,
+    fontSize: 16,
   },
-  addServiceButtonText: {
-    color: '#e91e63',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  submitButton: {
-    backgroundColor: '#e91e63',
-    borderRadius: 4,
+  summaryButton: {
+    backgroundColor: '#FF4B81',
     padding: 16,
     alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 32,
+    margin: 16,
+    borderRadius: 8,
   },
-  submitButtonText: {
+  summaryButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
