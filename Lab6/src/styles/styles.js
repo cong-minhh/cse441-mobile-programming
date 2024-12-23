@@ -602,4 +602,148 @@ export const styles = StyleSheet.create({
     color: '#dc3545',
     marginLeft: 12,
   },
+
+  // Transaction Detail Screen
+  transactionDetailContainer: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  transactionDetailSection: {
+    backgroundColor: 'white',
+    marginBottom: 10,
+    padding: 15,
+  },
+  transactionDetailSectionTitle: {
+    fontSize: 18,
+    color: '#f06292',
+    marginBottom: 15,
+    fontWeight: '600',
+  },
+  transactionDetailInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  transactionDetailLabel: {
+    color: '#757575',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  transactionDetailValue: {
+    color: '#212121',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  transactionDetailServiceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  transactionDetailServiceInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  transactionDetailServiceName: {
+    color: '#212121',
+    fontSize: 15,
+    fontWeight: '500',
+    marginRight: 8,
+  },
+  transactionDetailServiceQuantity: {
+    color: '#757575',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  transactionDetailServicePrice: {
+    color: '#212121',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  transactionDetailTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    marginTop: 10,
+  },
+  transactionDetailTotalAmount: {
+    color: '#212121',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  transactionDetailDiscountValue: {
+    color: '#f06292',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  transactionDetailTotalPaymentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    marginTop: 10,
+  },
+  transactionDetailTotalPayment: {
+    color: '#f06292',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+
+  // Transaction List
+  transactionCard: {
+    backgroundColor: 'white',
+    marginHorizontal: 15,
+    marginVertical: 5,
+    padding: 15,
+    borderRadius: 8,
+    elevation: 1,
+  },
+  transactionIdDate: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    color: '#212121',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  transactionServices: {
+    marginBottom: 5,
+  },
+  transactionServiceItem: {
+    color: '#757575',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  transactionCustomerRow: {
+    flexDirection: 'row',
+    marginTop: 5,
+  },
+  transactionCustomerLabel: {
+    color: '#757575',
+    fontSize: 15,
+  },
+  transactionCustomerName: {
+    color: '#757575',
+    fontSize: 15,
+    marginLeft: 5,
+  },
+  transactionPrice: {
+    color: '#f06292',
+    fontSize: 16,
+    fontWeight: '500',
+    position: 'absolute',
+    right: 15,
+    bottom: 15,
+  },
+  transactionCancelled: {
+    color: '#dc3545',
+    fontSize: 15,
+    fontWeight: '500',
+    marginLeft: 5,
+  },
 });

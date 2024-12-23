@@ -1,79 +1,95 @@
 import React from 'react';
 import {View, Text, ScrollView} from 'react-native';
-import { styles } from '../styles/styles';
-
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import {styles} from '../styles/styles';
 
 const TransactionDetailScreen = ({route}) => {
   const {transaction} = route.params;
 
   const formatDate = dateString => {
-    const options = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    };
-    return new Date(dateString).toLocaleDateString('vi-VN', options);
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, '0')}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}/${date.getFullYear()} ${date
+      .getHours()
+      .toString()
+      .padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   };
 
   return (
-    <ScrollView style={styles.detailContainer}>
-      <View style={styles.detailHeader}>
-        <Text style={styles.detailTitle}>Transaction Details</Text>
-        <Text style={styles.detailSubtitle}>#{transaction._id.slice(-6)}</Text>
+    <ScrollView style={styles.transactionDetailContainer}>
+      <View style={styles.transactionDetailSection}>
+        <Text style={styles.transactionDetailSectionTitle}>
+          General information
+        </Text>
+        <View style={styles.transactionDetailInfoRow}>
+          <Text style={styles.transactionDetailLabel}>Transaction code</Text>
+          <Text style={styles.transactionDetailValue}>{transaction.id}</Text>
+        </View>
+        <View style={styles.transactionDetailInfoRow}>
+          <Text style={styles.transactionDetailLabel}>Customer</Text>
+          <Text style={styles.transactionDetailValue}>
+            {transaction.customer?.name || 'Unknown'}
+          </Text>
+        </View>
+        <View style={styles.transactionDetailInfoRow}>
+          <Text style={styles.transactionDetailLabel}>Creation time</Text>
+          <Text style={styles.transactionDetailValue}>
+            {formatDate(transaction.createdAt)}
+          </Text>
+        </View>
       </View>
 
-      <View style={styles.detailContent}>
-        <View style={styles.detailSection}>
-          <View style={styles.detailRow}>
-            <View style={styles.detailLabelContainer}>
-              <Icon name="person" size={20} color="#5f6368" />
-              <Text style={styles.detailLabel}>Customer</Text>
+      <View style={styles.transactionDetailSection}>
+        <Text style={styles.transactionDetailSectionTitle}>Services list</Text>
+        {transaction.services.map((service, index) => (
+          <View key={index} style={styles.transactionDetailServiceRow}>
+            <View style={styles.transactionDetailServiceInfo}>
+              <Text style={styles.transactionDetailServiceName}>
+                {service.name}
+              </Text>
+              <Text style={styles.transactionDetailServiceQuantity}>
+                x{service.quantity || 1}
+              </Text>
             </View>
-            <Text style={styles.detailValue}>
-              {transaction.customer?.name || 'Unknown Customer'}
+            <Text style={styles.transactionDetailServicePrice}>
+              {Number(service.price).toLocaleString('vi-VN')} đ
             </Text>
           </View>
-
-          <View style={styles.detailRow}>
-            <View style={styles.detailLabelContainer}>
-              <Icon name="attach-money" size={20} color="#5f6368" />
-              <Text style={styles.detailLabel}>Total Amount</Text>
-            </View>
-            <Text style={[styles.detailValue, styles.amount]}>
-              {Number(transaction.amount).toLocaleString('vi-VN')}₫
-            </Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <View style={styles.detailLabelContainer}>
-              <Icon name="event" size={20} color="#5f6368" />
-              <Text style={styles.detailLabel}>Date</Text>
-            </View>
-            <Text style={styles.detailValue}>
-              {formatDate(transaction.date)}
-            </Text>
-          </View>
+        ))}
+        <View style={styles.transactionDetailTotalRow}>
+          <Text style={styles.transactionDetailLabel}>Total</Text>
+          <Text style={styles.transactionDetailTotalAmount}>
+            {Number(transaction.priceBeforePromotion).toLocaleString('vi-VN')} đ
+          </Text>
         </View>
+      </View>
 
-        {transaction.services && transaction.services.length > 0 && (
-          <View style={styles.detailSection}>
-            <Text style={styles.sectionTitle}>Services</Text>
-            {transaction.services.map((service, index) => (
-              <View key={index} style={styles.serviceItem}>
-                <View style={styles.serviceInfo}>
-                  <Icon name="spa" size={20} color="#5f6368" />
-                  <Text style={styles.serviceName}>{service.name}</Text>
-                </View>
-                <Text style={styles.servicePrice}>
-                  {Number(service.price).toLocaleString('vi-VN')}₫
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
+      <View style={styles.transactionDetailSection}>
+        <Text style={styles.transactionDetailSectionTitle}>Cost</Text>
+        <View style={styles.transactionDetailInfoRow}>
+          <Text style={styles.transactionDetailLabel}>Amount of money</Text>
+          <Text style={styles.transactionDetailValue}>
+            {Number(transaction.priceBeforePromotion).toLocaleString('vi-VN')} đ
+          </Text>
+        </View>
+        <View style={styles.transactionDetailInfoRow}>
+          <Text style={styles.transactionDetailLabel}>Discount</Text>
+          <Text style={styles.transactionDetailDiscountValue}>
+            -
+            {Number(
+              transaction.priceBeforePromotion - transaction.price || 0,
+            ).toLocaleString('vi-VN')}{' '}
+            đ
+          </Text>
+        </View>
+        <View style={styles.transactionDetailTotalPaymentRow}>
+          <Text style={styles.transactionDetailLabel}>Total payment</Text>
+          <Text style={styles.transactionDetailTotalPayment}>
+            {Number(transaction.price).toLocaleString('vi-VN')} đ
+          </Text>
+        </View>
       </View>
     </ScrollView>
   );

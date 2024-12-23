@@ -1,8 +1,7 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { styles } from '../styles/styles';
-
+import {styles} from '../styles/styles';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const SettingsScreen = ({navigation}) => {

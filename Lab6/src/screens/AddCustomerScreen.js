@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,10 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { styles } from '../styles/styles';
+import {styles} from '../styles/styles';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const AddCustomerScreen = ({ navigation }) => {
+const AddCustomerScreen = ({navigation}) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
@@ -26,8 +26,8 @@ const AddCustomerScreen = ({ navigation }) => {
       const token = await AsyncStorage.getItem('userToken');
       await axios.post(
         'https://kami-backend-5rs0.onrender.com/customers',
-        { name, phone },
-        { headers: { Authorization: `Bearer ${token}` } },
+        {name, phone},
+        {headers: {Authorization: `Bearer ${token}`}},
       );
       Alert.alert('Success', 'Customer added successfully');
       navigation.goBack();

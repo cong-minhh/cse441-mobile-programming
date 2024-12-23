@@ -1,15 +1,8 @@
 import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  Image,
-} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { styles } from '../styles/styles';
+import {styles} from '../styles/styles';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -37,7 +30,7 @@ const LoginScreen = ({navigation}) => {
         await AsyncStorage.setItem('userToken', response.data.token);
         navigation.reset({
           index: 0,
-          routes: [{name: 'Home'}],
+          routes: [{name: 'HomeMain'}],
         });
       }
     } catch (error) {
