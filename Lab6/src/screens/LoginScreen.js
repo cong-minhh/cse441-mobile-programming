@@ -37,7 +37,7 @@ const LoginScreen = ({navigation}) => {
         await AsyncStorage.setItem('userToken', response.data.token);
         navigation.reset({
           index: 0,
-          routes: [{name: 'Main'}],
+          routes: [{name: 'Home'}],
         });
       }
     } catch (error) {
