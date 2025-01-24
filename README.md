@@ -40,7 +40,3 @@ This course covers essential topics in mobile application development, including
 ## Author
 
 Minh Nguyen 
-
-## Last Updated
-
-January 24, 2025
